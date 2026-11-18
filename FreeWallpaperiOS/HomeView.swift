@@ -78,6 +78,7 @@ struct HomeView: View {
 
     @ViewBuilder
     private var chipsContainer: some View {
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             GlassEffectContainer(spacing: 8) {
                 HStack(spacing: 8) {
@@ -89,6 +90,11 @@ struct HomeView: View {
                 ForEach(vm.hotKeywords, id: \.self) { k in chip(k) }
             }
         }
+        #else
+        HStack(spacing: 8) {
+            ForEach(vm.hotKeywords, id: \.self) { k in chip(k) }
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -141,8 +147,13 @@ struct HomeView: View {
                         case .success(let img):
                             img.resizable().scaledToFit()
                         case .failure:
-                            AsyncImage(url: item.thumbURL) { p in
-                                if case .success(let t) = p { t.resizable().scaledToFit() }
+                            AsyncImage(url: item.thumbURL) { thumbPhase in
+                                switch thumbPhase {
+                                case .success(let t):
+                                    t.resizable().scaledToFit()
+                                default:
+                                    Color.clear
+                                }
                             } placeholder: {
                                 ProgressView().tint(.white)
                             }
@@ -203,6 +214,7 @@ private struct ChipGlass: ViewModifier {
     let namespace: Namespace.ID
 
     func body(content: Content) -> some View {
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content
                 .glassEffectID(key, in: namespace)
@@ -213,34 +225,50 @@ private struct ChipGlass: ViewModifier {
                     in: .capsule
                 )
         } else {
-            content
-                .background(
-                    active ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.regularMaterial),
-                    in: .capsule
-                )
+            legacy(content, active: active)
         }
+        #else
+        legacy(content, active: active)
+        #endif
+    }
+
+    @ViewBuilder
+    private func legacy(_ content: Content, active: Bool) -> some View {
+        content
+            .background(
+                active ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.regularMaterial),
+                in: .capsule
+            )
     }
 }
 
 // MARK: - 兼容层：普通玻璃按钮 / 传统描边按钮
 private struct GlassButtonCompat: ViewModifier {
     func body(content: Content) -> some View {
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content.buttonStyle(.glass)
         } else {
             content.buttonStyle(.bordered).tint(.white)
         }
+        #else
+        content.buttonStyle(.bordered).tint(.white)
+        #endif
     }
 }
 
 // MARK: - 兼容层：强调玻璃按钮 / 传统强调按钮
 private struct ProminentButtonCompat: ViewModifier {
     func body(content: Content) -> some View {
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content.buttonStyle(.glassProminent)
         } else {
             content.buttonStyle(.borderedProminent)
         }
+        #else
+        content.buttonStyle(.borderedProminent)
+        #endif
     }
 }
 
@@ -248,6 +276,7 @@ private struct ProminentButtonCompat: ViewModifier {
 private struct ToolbarGlassCompat: ViewModifier {
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content
                 .background(shape.fill(.regularMaterial))
@@ -255,17 +284,24 @@ private struct ToolbarGlassCompat: ViewModifier {
         } else {
             content.background(shape.fill(.regularMaterial))
         }
+        #else
+        content.background(shape.fill(.regularMaterial))
+        #endif
     }
 }
 
 // MARK: - 兼容层：圆形角标玻璃 / 传统材质
 private struct CircleGlassCompat: ViewModifier {
     func body(content: Content) -> some View {
+        #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content.glassEffect(.regular, in: .circle)
         } else {
             content.background(.regularMaterial, in: .circle)
         }
+        #else
+        content.background(.regularMaterial, in: .circle)
+        #endif
     }
 }
 
