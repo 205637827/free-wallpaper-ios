@@ -143,12 +143,11 @@ struct HomeView: View {
             TabView(selection: $previewIndex) {
                 ForEach(Array(vm.items.enumerated()), id: \.element.id) { idx, item in
                     AsyncImage(url: item.fullURL) { phase in
-                        switch phase {
-                        case .success(let img):
+                        if let img = phase.image {
                             img.resizable().scaledToFit()
-                        case .failure:
+                        } else if phase.error != nil {
                             self.thumbFallback(url: item.thumbURL)
-                        default:
+                        } else {
                             ProgressView().tint(.white)
                         }
                     }
@@ -201,10 +200,9 @@ struct HomeView: View {
     @ViewBuilder
     private func thumbFallback(url: URL?) -> some View {
         AsyncImage(url: url) { thumbPhase in
-            switch thumbPhase {
-            case .success(let t):
+            if let t = thumbPhase.image {
                 t.resizable().scaledToFit()
-            default:
+            } else {
                 Color.clear
             }
         } placeholder: {
@@ -318,15 +316,14 @@ private struct CardView: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             AsyncImage(url: item.thumbURL) { phase in
-                switch phase {
-                case .success(let img):
+                if let img = phase.image {
                     img.resizable().scaledToFill()
                         .frame(maxWidth: .infinity)
                         .clipped()
-                case .failure:
+                } else if phase.error != nil {
                     Color.gray.opacity(0.25)
                         .overlay(Image(systemName: "photo").foregroundStyle(.secondary))
-                default:
+                } else {
                     Color.gray.opacity(0.2)
                         .overlay(ProgressView())
                 }
