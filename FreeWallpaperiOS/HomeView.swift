@@ -14,13 +14,13 @@ struct HomeView: View {
 
     // 顶部分类 Tab（对应原 App：专辑/热门/Live/免费/SVIP/年度）
     private let tabs: [(title: String, keyword: String)] = [
-        ("推荐", "nature"),
+        ("推荐", "wallpaper"),
         ("专辑", "album"),
         ("热门", "hot"),
-        ("Live", "live photo"),
+        ("Live", "live"),
         ("免费", "free"),
-        ("SVIP", "4k"),
-        ("年度", "2024"),
+        ("SVIP", "hd"),
+        ("年度", "new"),
     ]
 
     private let columns = [
@@ -190,7 +190,7 @@ struct HomeView: View {
         }
         .navigationTitle("视频壁纸")
         .navigationBarTitleDisplayMode(.inline)
-        .task { if vm.items.isEmpty { await vm.search("live photo") } }
+        .task { if vm.items.isEmpty { await vm.search("live") } }
     }
 
     // MARK: - 相册页
