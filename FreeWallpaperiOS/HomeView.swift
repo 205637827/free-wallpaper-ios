@@ -196,15 +196,10 @@ struct HomeView: View {
         vm.items.indices.contains(previewIndex) ? vm.items[previewIndex] : vm.items.first
     }
 
-    /// 缩略图回退：独立方法，避免嵌套 AsyncImage 闭包的类型推断歧义
-    @ViewBuilder
+    /// 缩略图回退：placeholder 重载的闭包参数是 Image，直接用
     private func thumbFallback(url: URL?) -> some View {
-        AsyncImage(url: url) { (thumbPhase: AsyncImagePhase) in
-            if let t = thumbPhase.image {
-                t.resizable().scaledToFit()
-            } else {
-                Color.clear
-            }
+        AsyncImage(url: url) { image in
+            image.resizable().scaledToFit()
         } placeholder: {
             ProgressView().tint(.white)
         }
