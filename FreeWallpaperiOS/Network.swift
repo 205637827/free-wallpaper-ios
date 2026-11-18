@@ -1,20 +1,20 @@
 import Foundation
 
 /// 直接对接壁纸 App 逆向出的 claritywallpaper 搜索 API
-enum WallpaperAPI {
+struct WallpaperAPI {
     static let shared = WallpaperAPI()
 
     private let endpoint = URL(string: "https://claritywallpaper.com/clarity/api/picture/annotateSearchPlus")!
     private let token = "ZmY4MDgwODE3OWE0MjRjZDAxNzliOTFiNzM0OTJlZjg="
     private let ua = "Clarity/7.1.2 (iPhone; iOS 14.2; Scale/3.00)"
 
-    // 简易内存缓存
-    private var cache: [String: (date: Date, items: [WallpaperItem])] = [:]
+    // 简易内存缓存（静态，避免 struct 值语义导致写入失败）
+    private static var cache: [String: (date: Date, items: [WallpaperItem])] = [:]
     private let ttl: TimeInterval = 300
 
     func search(keyword: String, page: Int, size: Int = 24) async throws -> [WallpaperItem] {
         let ck = "\(keyword)|\(page)|\(size)"
-        if let hit = cache[ck], Date().timeIntervalSince(hit.date) < ttl {
+        if let hit = Self.cache[ck], Date().timeIntervalSince(hit.date) < ttl {
             return hit.items
         }
 
@@ -42,7 +42,7 @@ enum WallpaperAPI {
                 guard decoded.code == 200, let items = decoded.data else {
                     throw APIError.server(decoded.message ?? "未知错误")
                 }
-                cache[ck] = (Date(), items)
+                Self.cache[ck] = (Date(), items)
                 return items
             } catch {
                 lastError = error
