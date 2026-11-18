@@ -147,16 +147,7 @@ struct HomeView: View {
                         case .success(let img):
                             img.resizable().scaledToFit()
                         case .failure:
-                            AsyncImage(url: item.thumbURL) { thumbPhase in
-                                switch thumbPhase {
-                                case .success(let t):
-                                    t.resizable().scaledToFit()
-                                default:
-                                    Color.clear
-                                }
-                            } placeholder: {
-                                ProgressView().tint(.white)
-                            }
+                            self.thumbFallback(url: item.thumbURL)
                         default:
                             ProgressView().tint(.white)
                         }
@@ -204,6 +195,21 @@ struct HomeView: View {
 
     private var safeItem: WallpaperItem? {
         vm.items.indices.contains(previewIndex) ? vm.items[previewIndex] : vm.items.first
+    }
+
+    /// 缩略图回退：独立方法，避免嵌套 AsyncImage 闭包的类型推断歧义
+    @ViewBuilder
+    private func thumbFallback(url: URL?) -> some View {
+        AsyncImage(url: url) { thumbPhase in
+            switch thumbPhase {
+            case .success(let t):
+                t.resizable().scaledToFit()
+            default:
+                Color.clear
+            }
+        } placeholder: {
+            ProgressView().tint(.white)
+        }
     }
 }
 
