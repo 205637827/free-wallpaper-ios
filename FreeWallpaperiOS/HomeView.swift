@@ -142,7 +142,7 @@ struct HomeView: View {
 
             TabView(selection: $previewIndex) {
                 ForEach(Array(vm.items.enumerated()), id: \.element.id) { idx, item in
-                    AsyncImage(url: item.fullURL) { phase in
+                    AsyncImage(url: item.fullURL) { (phase: AsyncImagePhase) in
                         if let img = phase.image {
                             img.resizable().scaledToFit()
                         } else if phase.error != nil {
@@ -199,7 +199,7 @@ struct HomeView: View {
     /// 缩略图回退：独立方法，避免嵌套 AsyncImage 闭包的类型推断歧义
     @ViewBuilder
     private func thumbFallback(url: URL?) -> some View {
-        AsyncImage(url: url) { thumbPhase in
+        AsyncImage(url: url) { (thumbPhase: AsyncImagePhase) in
             if let t = thumbPhase.image {
                 t.resizable().scaledToFit()
             } else {
@@ -315,7 +315,7 @@ private struct CardView: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            AsyncImage(url: item.thumbURL) { phase in
+            AsyncImage(url: item.thumbURL) { (phase: AsyncImagePhase) in
                 if let img = phase.image {
                     img.resizable().scaledToFill()
                         .frame(maxWidth: .infinity)
