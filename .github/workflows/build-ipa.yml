@@ -14,8 +14,10 @@ jobs:
 
       - name: Select Xcode
         run: |
-          ls /Applications | grep Xcode || true
-          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          echo "Available Xcode:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          xcode-select -p
+          xcodebuild -version
 
       - name: Archive (unsigned)
         run: |
